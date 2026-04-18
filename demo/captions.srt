@@ -1,0 +1,55 @@
+1
+00:00:00,000 --> 00:00:08,000
+tikbuzz is a personal TikTok pipeline for a single creator account operated in Sandbox mode.
+
+2
+00:00:08,000 --> 00:00:15,000
+Website URL registered with TikTok: seeton.github.io/tikbuzz. Terms of Service and Privacy Policy are hosted there.
+
+3
+00:00:15,000 --> 00:00:25,000
+This integration uses two products: Login Kit and Content Posting API. Two scopes are requested: user.info.basic and video.upload.
+
+4
+00:00:25,000 --> 00:00:35,000
+Login Kit demo. The local CLI prints an authorization URL with PKCE code challenge and a CSRF state value.
+
+5
+00:00:35,000 --> 00:00:50,000
+The operator opens the URL in a browser, signs in to their own TikTok account, and sees the two requested scopes on the consent screen.
+
+6
+00:00:50,000 --> 00:01:00,000
+After approval, TikTok redirects the browser to seeton.github.io/tikbuzz/callback.html, a static page that displays the returned code and state value.
+
+7
+00:01:00,000 --> 00:01:10,000
+The operator pastes the redirect URL into the CLI. The CLI verifies state, exchanges the code at open.tiktokapis.com slash v2 slash oauth slash token, and stores access and refresh tokens locally in dot-tiktok-token.json.
+
+8
+00:01:10,000 --> 00:01:20,000
+Content Posting API demo. The publish command reads the final rendered MP4 from the latest run directory.
+
+9
+00:01:20,000 --> 00:01:32,000
+The CLI posts to v2 slash post slash publish slash inbox slash video slash init with source FILE_UPLOAD, the video size, and chunk info. This is where the video.upload scope is used.
+
+10
+00:01:32,000 --> 00:01:44,000
+The returned upload_url receives the MP4 via a PUT request with Content-Range headers.
+
+11
+00:01:44,000 --> 00:01:56,000
+The CLI polls v2 slash post slash publish slash status slash fetch until the status becomes SEND_TO_USER_INBOX.
+
+12
+00:01:56,000 --> 00:02:06,000
+The publish_id and final status are written to publish-log.json for audit.
+
+13
+00:02:06,000 --> 00:02:18,000
+The draft now appears inside the operator's own TikTok inbox. The operator reviews it and publishes manually from the TikTok app.
+
+14
+00:02:18,000 --> 00:02:25,000
+End of end-to-end demo. Only the operator's own account and locally rendered videos are involved.

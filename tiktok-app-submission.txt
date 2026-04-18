@@ -1,0 +1,11 @@
+tikbuzz is a personal tool used only by its operator on their own TikTok account (Sandbox Target User). It drafts narration from public RSS, renders a 1080x1920 MP4 with Remotion, and uploads via the Content Posting API.
+
+Login Kit: OAuth 2.0 Authorization Code + PKCE. TikTok redirects to seeton.github.io/tikbuzz/callback.html, a static page showing the returned code and state. The operator pastes the URL into the CLI, which verifies state, exchanges the code at /v2/oauth/token/, and stores tokens locally.
+
+Content Posting API: POST /v2/post/publish/inbox/video/init/ with FILE_UPLOAD, PUT the MP4 in chunks to upload_url, then poll /v2/post/publish/status/fetch/ until SEND_TO_USER_INBOX. The operator reviews and publishes drafts manually in TikTok.
+
+Scopes:
+- user.info.basic: gets open_id to bind tokens to the operator's account; local use only.
+- video.upload: required by the inbox upload flow; only operator-generated MP4s.
+
+No third-party data; no automated engagement.

@@ -1,0 +1,101 @@
+================================================================
+tikbuzz demo video recording plan
+================================================================
+
+Goal: one continuous video (~2:20) proving end-to-end TikTok
+integration for the Developer Portal review.
+
+---------------------------------------------------------------
+PRE-FLIGHT CHECK
+---------------------------------------------------------------
+1) .env contains TIKTOK_CLIENT_KEY and TIKTOK_CLIENT_SECRET.
+2) Developer Portal sandbox has the operator's TikTok account
+   as Target User.
+3) TikTok mobile app is installed and signed in to the same
+   account.
+4) At least one runs/<timestamp>/final.mp4 exists.
+5) Delete or archive .tiktok-token.json before recording so
+   the OAuth flow shows from scratch:
+       rm -f .tiktok-token.json
+6) Zoom the terminal font (Cmd +) so captions are readable.
+
+---------------------------------------------------------------
+SCENE LIST
+---------------------------------------------------------------
+
+Scene 1 [00:00-00:15]  Website intro
+  - Open https://seeton.github.io/tikbuzz/ in the browser.
+  - Scroll once on Terms and once on Privacy.
+
+Scene 2 [00:15-00:25]  Scope overview
+  - Static terminal showing:
+        cat tiktok-app-submission.txt
+    (or just show the scope bullets on-screen)
+
+Scene 3 [00:25-01:10]  Login Kit
+  - Terminal:
+        ./scripts/with-local-node.sh env \
+          npm_config_cache="$PWD/.npm-cache" npm run tiktok:auth
+  - Copy the printed URL, paste into browser.
+  - On the TikTok consent screen, make sure
+    "user.info.basic" and "video.upload" are visible.
+  - Click "Authorize".
+  - Show the "認可完了" page.
+  - Switch back to terminal: .tiktok-token.json save log.
+  - Mask access_token / refresh_token values if visible.
+
+Scene 4 [01:10-01:55]  Content Posting API
+  - Terminal:
+        ./scripts/with-local-node.sh env \
+          npm_config_cache="$PWD/.npm-cache" npm run tiktok:publish
+  - Let the whole run play:
+        init response -> chunk PUT -> status polling
+  - Show publish-log.json at the end:
+        cat runs/$(ls -1t runs | head -n1)/publish-log.json
+
+Scene 5 [01:55-02:20]  Result in TikTok app
+  - Switch to phone screen recording.
+  - Open TikTok -> Profile -> Inbox (下書き / Drafts).
+  - Show the new video entry, tap to preview.
+  - Do NOT publish. Close the app.
+
+---------------------------------------------------------------
+RECORDING TOOLS
+---------------------------------------------------------------
+Mac screen:
+  Shift+Cmd+5 -> Record Entire Screen or Record Selected Portion.
+  Save as .mov, one single clip for scenes 1-4 is easiest.
+
+iPhone screen (for scene 5):
+  Control Center -> Screen Recording button.
+  Transfer the .mp4/.mov to the Mac via AirDrop.
+
+---------------------------------------------------------------
+POST-PROCESS
+---------------------------------------------------------------
+Concatenate mac+phone clips and burn in captions:
+
+  # 1. Convert phone clip to same resolution as mac clip if needed.
+  # 2. Concatenate (example):
+  cat > concat.txt <<'EOF'
+  file 'mac.mov'
+  file 'phone.mov'
+  EOF
+  ffmpeg -f concat -safe 0 -i concat.txt -c copy joined.mov
+
+  # 3. Burn in captions and compress under 50 MB:
+  ffmpeg -i joined.mov \
+    -vf "scale=-2:720,subtitles=demo/captions.srt:force_style='Fontsize=22'" \
+    -c:v libx264 -preset medium -crf 26 \
+    -c:a aac -b:a 96k \
+    demo/tikbuzz-demo.mp4
+
+  # 4. If still >50 MB, raise CRF (28, 30) or drop audio bitrate.
+
+---------------------------------------------------------------
+WHAT TO UPLOAD
+---------------------------------------------------------------
+Single file: demo/tikbuzz-demo.mp4
+  - resolution: 720p
+  - duration: ~2:20
+  - size: aim for 30-45 MB (hard cap is 50 MB per file)

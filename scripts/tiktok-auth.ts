@@ -1,12 +1,13 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
-import http from 'node:http';
 import path from 'node:path';
+import readline from 'node:readline/promises';
+import {stdin as input, stdout as output} from 'node:process';
 import {exchangeCodeForToken, saveToken} from '../src/pipeline/tiktok-token';
 
 const AUTHORIZE_URL = 'https://www.tiktok.com/v2/auth/authorize/';
-const DEFAULT_REDIRECT = 'http://localhost:5173/callback';
-const DEFAULT_SCOPE = 'user.info.basic,video.upload,video.publish';
+const DEFAULT_REDIRECT = 'https://seeton.github.io/tikbuzz/callback.html';
+const DEFAULT_SCOPE = 'user.info.basic,video.upload';
 
 const readDotEnv = async (rootDir: string) => {
   const envPath = path.join(rootDir, '.env');
@@ -42,60 +43,41 @@ const generatePkce = () => {
   return {codeVerifier, codeChallenge};
 };
 
-const waitForCallback = (params: {
-  redirect: URL;
-  expectedState: string;
-}): Promise<string> =>
-  new Promise((resolve, reject) => {
-    const server = http.createServer((req, res) => {
-      if (!req.url) {
-        res.statusCode = 400;
-        res.end('Bad request');
-        return;
-      }
-      const reqUrl = new URL(req.url, `http://${req.headers.host ?? 'localhost'}`);
-      if (reqUrl.pathname !== params.redirect.pathname) {
-        res.statusCode = 404;
-        res.end('Not found');
-        return;
-      }
-      const error = reqUrl.searchParams.get('error');
-      if (error) {
-        const description = reqUrl.searchParams.get('error_description') ?? '';
-        res.statusCode = 400;
-        res.end(`Authorization failed: ${error} ${description}`);
-        server.close();
-        reject(new Error(`${error}: ${description}`));
-        return;
-      }
-      const receivedState = reqUrl.searchParams.get('state');
-      const code = reqUrl.searchParams.get('code');
-      if (receivedState !== params.expectedState) {
-        res.statusCode = 400;
-        res.end('Invalid state parameter.');
-        server.close();
-        reject(new Error('State mismatch (possible CSRF).'));
-        return;
-      }
-      if (!code) {
-        res.statusCode = 400;
-        res.end('Missing authorization code.');
-        server.close();
-        reject(new Error('Authorization code missing in callback.'));
-        return;
-      }
-      res.statusCode = 200;
-      res.setHeader('content-type', 'text/html; charset=utf-8');
-      res.end(
-        '<!doctype html><html lang="ja"><body style="font-family:sans-serif;padding:2rem"><h1>認可完了</h1><p>ターミナルに戻って処理の続きを確認してください。このタブは閉じて構いません。</p></body></html>',
-      );
-      server.close();
-      resolve(code);
-    });
-    server.on('error', reject);
-    const port = Number(params.redirect.port) || 80;
-    server.listen(port, params.redirect.hostname);
-  });
+const parseCallback = (raw: string, expectedState: string) => {
+  const trimmed = raw.trim();
+  if (!trimmed) {
+    throw new Error('入力が空です。');
+  }
+  let params: URLSearchParams;
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    params = new URL(trimmed).searchParams;
+  } else if (trimmed.startsWith('?') || trimmed.includes('=')) {
+    params = new URLSearchParams(
+      trimmed.startsWith('?') ? trimmed.slice(1) : trimmed,
+    );
+  } else {
+    params = new URLSearchParams({code: trimmed});
+  }
+  const error = params.get('error');
+  if (error) {
+    const description = params.get('error_description') ?? '';
+    throw new Error(`Authorization error: ${error} ${description}`.trim());
+  }
+  const code = params.get('code');
+  if (!code) {
+    throw new Error('code パラメータが見つかりません。');
+  }
+  const state = params.get('state');
+  if (state && state !== expectedState) {
+    throw new Error('state 不一致 (CSRF の可能性)。最初からやり直してください。');
+  }
+  if (!state) {
+    console.warn(
+      'warning: state が見つかりません。code のみの入力でも続行しますが、CSRF 対策の検証ができません。',
+    );
+  }
+  return code;
+};
 
 const main = async () => {
   const rootDir = process.cwd();
@@ -112,7 +94,6 @@ const main = async () => {
     );
   }
 
-  const redirect = new URL(redirectUri);
   const state = base64Url(crypto.randomBytes(16));
   const {codeVerifier, codeChallenge} = generatePkce();
 
@@ -125,12 +106,20 @@ const main = async () => {
   authUrl.searchParams.set('code_challenge', codeChallenge);
   authUrl.searchParams.set('code_challenge_method', 'S256');
 
-  console.log('Open this URL in your browser to authorize tikbuzz:\n');
+  console.log('1) Open this URL in your browser and authorize tikbuzz:\n');
   console.log(authUrl.toString());
   console.log('');
-  console.log(`Waiting for callback at ${redirectUri} ...`);
+  console.log(
+    `2) After approval, TikTok redirects to ${redirectUri} with ?code=...&state=...`,
+  );
+  console.log('   Copy the FULL redirected URL from the address bar.');
+  console.log('');
 
-  const code = await waitForCallback({redirect, expectedState: state});
+  const rl = readline.createInterface({input, output});
+  const raw = await rl.question('3) Paste the redirected URL (or just the code) here:\n> ');
+  rl.close();
+
+  const code = parseCallback(raw, state);
 
   const token = await exchangeCodeForToken({
     clientKey,
@@ -140,7 +129,7 @@ const main = async () => {
     codeVerifier,
   });
   await saveToken(rootDir, token);
-  console.log(`Saved token to ${path.join(rootDir, '.tiktok-token.json')}`);
+  console.log(`\nSaved token to ${path.join(rootDir, '.tiktok-token.json')}`);
   console.log(
     JSON.stringify(
       {
