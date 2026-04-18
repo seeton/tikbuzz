@@ -1,0 +1,40 @@
+{
+  "name": "tikbuzz",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "remotion studio src/index.ts",
+    "discover": "tsx scripts/cli.ts discover",
+    "rank": "tsx scripts/cli.ts rank",
+    "brief": "tsx scripts/cli.ts brief",
+    "assets": "tsx scripts/cli.ts assets",
+    "voice": "tsx scripts/cli.ts voice",
+    "render": "tsx scripts/cli.ts render",
+    "run:auto-video": "tsx scripts/cli.ts run:auto-video",
+    "tiktok:auth": "tsx scripts/tiktok-auth.ts",
+    "tiktok:publish": "tsx scripts/cli.ts tiktok:publish",
+    "aivis:list-speakers": "tsx scripts/cli.ts aivis:list-speakers",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.365",
+    "cheerio": "^1.1.2",
+    "file-type": "^20.5.0",
+    "music-metadata": "^11.9.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "remotion": "^4.0.365",
+    "rss-parser": "^3.13.0",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@types/node": "^24.7.2",
+    "@types/react": "^19.1.16",
+    "@types/react-dom": "^19.1.9",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
+  }
+}

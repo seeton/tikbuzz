@@ -1,0 +1,10 @@
+.DS_Store
+.env
+.local/
+.npm-cache/
+.tiktok-token.json
+node_modules
+dist
+runs
+public/runs
+.remotion
