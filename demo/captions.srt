@@ -1,6 +1,6 @@
 1
 00:00:00,000 --> 00:00:08,000
-tikbuzz is a personal TikTok pipeline for a single creator account operated in Sandbox mode.
+Seeton Video Post is a personal TikTok pipeline for a single creator account operated in Sandbox mode.
 
 2
 00:00:08,000 --> 00:00:15,000
