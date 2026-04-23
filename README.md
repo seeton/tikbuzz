@@ -1,6 +1,6 @@
-# tikbuzz
+# Seeton Video Post
 
-Remotion と Aivis を使って、`トレンド収集 → 構成生成 → 素材取得 → 音声生成 → MP4 レンダリング` までを自動で流す TikTok 縦動画パイプラインです。
+Seeton Video Post は、Remotion と Aivis を使って、`トレンド収集 → 構成生成 → 素材取得 → 音声生成 → MP4 レンダリング` までを自動で流す TikTok 縦動画パイプラインです。
 
 ## 今あるもの
 

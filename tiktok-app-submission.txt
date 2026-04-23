@@ -1,4 +1,4 @@
-tikbuzz is a personal tool used only by its operator on their own TikTok account (Sandbox Target User). It drafts narration from public RSS, renders a 1080x1920 MP4 with Remotion, and uploads via the Content Posting API.
+Seeton Video Post is a personal tool used only by its operator on their own TikTok account (Sandbox Target User). It drafts narration from public RSS, renders a 1080x1920 MP4 with Remotion, and uploads via the Content Posting API.
 
 Login Kit: OAuth 2.0 Authorization Code + PKCE. TikTok redirects to seeton.github.io/tikbuzz/callback.html, a static page showing the returned code and state. The operator pastes the URL into the CLI, which verifies state, exchanges the code at /v2/oauth/token/, and stores tokens locally.
 

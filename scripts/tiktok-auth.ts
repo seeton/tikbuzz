@@ -106,7 +106,7 @@ const main = async () => {
   authUrl.searchParams.set('code_challenge', codeChallenge);
   authUrl.searchParams.set('code_challenge_method', 'S256');
 
-  console.log('1) Open this URL in your browser and authorize tikbuzz:\n');
+  console.log('1) Open this URL in your browser and authorize Seeton Video Post:\n');
   console.log(authUrl.toString());
   console.log('');
   console.log(

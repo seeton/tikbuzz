@@ -7,7 +7,7 @@ layout: default
 
 _Last updated: 2026-04-17_
 
-This Privacy Policy explains how **tikbuzz** ("the Software") handles data. The Software is a personal automation tool operated by a single individual (the "Operator") for their own TikTok creator account. It is not offered as a multi-user service and does not collect data from any person other than the Operator.
+This Privacy Policy explains how **Seeton Video Post** ("the Software") handles data. The Software is a personal automation tool operated by a single individual (the "Operator") for their own TikTok creator account. It is not offered as a multi-user service and does not collect data from any person other than the Operator.
 
 ## 1. Data the Software Handles
 

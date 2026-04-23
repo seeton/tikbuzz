@@ -7,7 +7,7 @@ layout: default
 
 _Last updated: 2026-04-17_
 
-These Terms of Service ("Terms") govern the use of **tikbuzz** ("the Software"), a personal automation project that prepares and uploads short vertical videos to the operator's own TikTok account.
+These Terms of Service ("Terms") govern the use of **Seeton Video Post** ("the Software"), a personal automation project that prepares and uploads short vertical videos to the operator's own TikTok account.
 
 ## 1. Scope
 
